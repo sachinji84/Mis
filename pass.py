@@ -164,3 +164,36 @@ async def interact_with_document(doc_id: int, chat_request: ChatRequest):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+#######################################################################################
+
+
+
+from azure.ai.openai import OpenAIClient
+from azure.core.credentials import AzureKeyCredential
+
+# Configuration
+AZURE_OPENAI_KEY = "your-azure-openai-api-key"
+AZURE_OPENAI_ENDPOINT = "https://your-azure-openai-endpoint.openai.azure.com"
+EMBEDDING_DEPLOYMENT_ID = "test-embedding-3-small"  # Replace with your deployment ID
+
+# Initialize OpenAI client
+client = OpenAIClient(
+    endpoint=AZURE_OPENAI_ENDPOINT,
+    credential=AzureKeyCredential(AZURE_OPENAI_KEY)
+)
+
+# Text for which you want to generate embeddings
+input_text = "Hello, how are you?"
+
+# Fetch embeddings
+try:
+    response = client.get_embeddings(
+        deployment_id=EMBEDDING_DEPLOYMENT_ID,
+        input=input_text
+    )
+    embeddings = response["data"][0]["embedding"]
+    print(f"Embedding for '{input_text}':\n{embeddings[:10]}...")  # Print the first 10 values
+    print(f"Embedding length: {len(embeddings)}")
+except Exception as e:
+    print(f"Error fetching embeddings: {e}")
+
