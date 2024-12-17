@@ -10,7 +10,7 @@ def main(resolutionInput: func.HttpRequest) -> func.HttpResponse:
     try:
         # Parse JSON body from request
         request_body = resolutionInput.get_json()
-        resolution_message = request_body.get("resolution_message", "")
+        resolution_message = request_body.get("resolution", "")
         message_id = request_body.get("message_id", "")
 
         if not resolution_message or not message_id:
@@ -19,7 +19,7 @@ def main(resolutionInput: func.HttpRequest) -> func.HttpResponse:
         # Authenticate using DefaultAzureCredential (managed identity or service principal)
         credential = DefaultAzureCredential()
         blob_service_client = BlobServiceClient(
-            account_url="https://<your-storage-account-name>.blob.core.windows.net",
+            account_url="https://opsworkstrqa.blob.core.windows.net",
             credential=credential
         )
 
