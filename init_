@@ -1,0 +1,48 @@
+import os
+from azure.identity import ClientSecretCredential
+from azure.storage.blob import BlobServiceClient
+import azure.functions as func
+from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.list_items import ListItemCollection
+
+BLOB_CONTAINER_NAME = "jcr-feedbacks"
+SHAREPOINT_SITE_URL = os.getenv('SHAREPOINT_SITE_URL')
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+
+def main(context: func.TimerRequest) -> None:
+    if context.past_due:
+        return  # If past due, exit
+    
+    try:
+        # Initialize SharePoint client with managed identity
+        credential = ClientSecretCredential(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
+        ctx = ClientContext(SHAREPOINT_SITE_URL).with_credentials(credential)
+
+        # Access the SharePoint list
+        list_title = "JCR-ChatBot-Feedbacks"
+        list_items: ListItemCollection = ctx.web.lists.get_by_title(list_title).items
+
+        # Fetch items updated after the last processed item timestamp
+        items = list_items.filter("Modified ne null").top(100).order_by("Modified desc").execute_query()
+
+        # Initialize BlobServiceClient with managed identity
+        blob_service_client = BlobServiceClient.from_credential(credential)
+        blob_client = blob_service_client.get_blob_client(container=BLOB_CONTAINER_NAME)
+
+        for item in items:
+            # Process each item
+            message_id = item["Title"]
+            feedback_description = item["FeedbackDescription"]
+            resolution_message = item.get("Resolution", "")
+            print(f"Processing item: ID={message_id}, Description={feedback_description}, Resolution={resolution_message}")
+
+            # Write the resolution message to blob storage
+            blob_content = f"Message ID: {message_id}\nFeedback: {feedback_description}\nResolution: {resolution_message}"
+            blob_client.upload_blob(f"{message_id}.txt", blob_content, overwrite=True)
+
+        return func.HttpResponse(f"Processed {len(items)} items successfully.", status_code=200)
+    
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
+        return func.HttpResponse(f"An error occurred: {str(e)}", status_code=500)
