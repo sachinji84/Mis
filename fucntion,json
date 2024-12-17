@@ -1,0 +1,17 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "0 0 * * *",  // Run daily at midnight
+      "name": "context"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "response"
+    }
+  ],
+  "disabled": false
+}
