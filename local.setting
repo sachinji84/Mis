@@ -1,6 +1,7 @@
 {
+  "IsEncrypted": false,
   "Values": {
-    "AzureWebJobsStorage": "YourAzureStorageAccountConnectionString",
-    "BLOB_STORAGE_CONNECTION_STRING": "YourAzureStorageAccountConnectionString"
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python"
   }
 }
