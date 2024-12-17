@@ -1,0 +1,6 @@
+{
+  "Values": {
+    "AzureWebJobsStorage": "YourAzureStorageAccountConnectionString",
+    "BLOB_STORAGE_CONNECTION_STRING": "YourAzureStorageAccountConnectionString"
+  }
+}
